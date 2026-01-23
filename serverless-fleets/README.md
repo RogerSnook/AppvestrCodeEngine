@@ -142,6 +142,7 @@ Run a serverless fleet that runs 1 single task and instance with 2 CPUs and 4 GB
 ibmcloud code-engine fleet create
    --name fleet-b4bd2a33-1
    --tasks-state-store fleet-task-store
+   --subnetpool-name fleet-subnetpool
    --image registry.access.redhat.com/ubi8/ubi-minimal:latest
    --command=sleep
    --arg 60
@@ -152,6 +153,7 @@ ibmcloud code-engine fleet create
 Successfully created fleet with name 'fleet-b4bd2a33-1' and ID 'e3caac88-cfc2-4602-8684-b527a6811716'
 Run 'ibmcloud ce fleet get --id e3caac88-cfc2-4602-8684-b527a6811716' to check the fleet status.
 Run 'ibmcloud ce fleet worker list --fleet-id e3caac88-cfc2-4602-8684-b527a6811716' to retrieve a list of provisioned workers.
+Run 'ibmcloud ce fleet task list --fleet-id e3caac88-cfc2-4602-8684-b527a6811716' to retrieve a list of tasks.
 OK
 ```
 </details>
@@ -283,8 +285,9 @@ Run a serverless fleet to process 100 tasks where each tasks gets 1 CPU and 2 GB
 ```
 ➜  serverless-fleets ibmcloud code-engine fleet create
   --name fleet-847292b7-1
-  --image registry.access.redhat.com/ubi8/ubi-minimal:latest
   --tasks-state-store fleet-task-store
+  --subnetpool-name fleet-subnetpool
+  --image registry.access.redhat.com/ubi8/ubi-minimal:latest
   --command=sleep
   --arg 2
   --tasks 100

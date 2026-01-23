@@ -176,11 +176,12 @@ Use `./run_h100` to run all 8 batches from `commands_h100.jsonl` on machine with
 ```
 ➜  inferencing ./run
 ibmcloud code-engine fleet create --name fleet-19f82e90-1
+  --tasks-state-store fleet-task-store \
+  --subnetpool-name fleet-subnetpool \
   --image private.de.icr.io/ce--fleet-inferencing-e7469696/inferencing
   --registry-secret ce-auto-icr-private-eu-de
   --max-scale 1
   --tasks-from-local-file commands.jsonl
-  --tasks-state-store fleet-task-store
   --gpu l40s:1
   --cpu 24
   --memory 120G

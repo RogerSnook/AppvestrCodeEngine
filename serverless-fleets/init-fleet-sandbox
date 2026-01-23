@@ -76,9 +76,19 @@ function clean() {
         ibmcloud is public-gateway-delete $vpc_name-gateway --force 2>/dev/null
         # END Remove old legacy components
 
-        ibmcloud is subnet-delete $vpc_name-subnet-1 --force 2>/dev/null
-        ibmcloud is subnet-delete $vpc_name-subnet-2 --force 2>/dev/null
-        ibmcloud is subnet-delete $vpc_name-subnet-3 --force 2>/dev/null
+        for i in {1..3}
+        do
+            if ibmcloud is subnet-public-gateway $vpc_name-subnet-$i >/dev/null 2>&1; then
+                ibmcloud is subnet-public-gateway-detach $vpc_name-subnet-$i --force 2>/dev/null
+            fi
+            if ibmcloud is subnet $vpc_name-subnet-$i $vpc_name >/dev/null 2>&1; then
+                ibmcloud is subnet-delete $vpc_name-subnet-$i --force 2>/dev/null
+            fi
+            if ibmcloud is public-gateway $vpc_name-gateway-$i >/dev/null 2>&1; then
+                ibmcloud is public-gateway-delete $vpc_name-gateway-$i --force 2>/dev/null
+            fi
+        done
+
         ibmcloud is network-acl-delete $vpc_name-acl --force 2>/dev/null
         ibmcloud is security-group-delete $vpc_name-group --force 2>/dev/null
         ibmcloud is vpc-delete $vpc_name --force 2>/dev/null
@@ -332,7 +342,7 @@ fi
 # Create the Network ACL
 if ! ibmcloud is network-acl $vpc_name-acl $vpc_name >/dev/null 2>&1; then
     print_msg "\nCreating the VPC Network ACL '$vpc_name-acl' ..."
-    ibmcloud is network-acl-create $vpc_name-acl $vpc_name --rules '[{ "name": "egress", "action": "allow", "destination": "0.0.0.0/0", "direction": "outbound", "source": "0.0.0.0/0", "protocol": "all" }, { "name": "ingress", "action": "allow", "destination": "0.0.0.0/0", "direction": "inbound", "source": "0.0.0.0/0", "protocol": "all" }]'
+    ibmcloud is network-acl-create $vpc_name-acl $vpc_name --rules '[{ "name": "egress", "action": "allow", "destination": "0.0.0.0/0", "direction": "outbound", "source": "0.0.0.0/0", "protocol": "icmp_tcp_udp" }, { "name": "ingress", "action": "allow", "destination": "0.0.0.0/0", "direction": "inbound", "source": "0.0.0.0/0", "protocol": "icmp_tcp_udp" }]'
     if [ $? -ne 0 ]; then
         print_error "VPC Network ACL creation failed!"
         abortScript
@@ -409,11 +419,11 @@ if ! ibmcloud is security-group $vpc_name-group $vpc_name >/dev/null 2>&1; then
     fi
 
     print_msg "\nCreating required VPC Security group rules ..."
-    ibmcloud is security-group-rule-add $vpc_name-group outbound all --remote 0.0.0.0/0 --vpc $vpc_name >/dev/null
-    ibmcloud is security-group-rule-add $vpc_name-group outbound all --remote 161.26.0.0/16 --vpc $vpc_name >/dev/null
-    ibmcloud is security-group-rule-add $vpc_name-group outbound all --remote 166.8.0.0/14 --vpc $vpc_name >/dev/null
-    ibmcloud is security-group-rule-add $vpc_name-group outbound all --remote $vpc_name-group --vpc $vpc_name >/dev/null
-    ibmcloud is security-group-rule-add $vpc_name-group inbound all --remote $vpc_name-group --vpc $vpc_name >/dev/null
+    ibmcloud is security-group-rule-add $vpc_name-group outbound icmp_tcp_udp --remote 0.0.0.0/0 --vpc $vpc_name >/dev/null
+    ibmcloud is security-group-rule-add $vpc_name-group outbound icmp_tcp_udp --remote 161.26.0.0/16 --vpc $vpc_name >/dev/null
+    ibmcloud is security-group-rule-add $vpc_name-group outbound icmp_tcp_udp --remote 166.8.0.0/14 --vpc $vpc_name >/dev/null
+    ibmcloud is security-group-rule-add $vpc_name-group outbound icmp_tcp_udp --remote $vpc_name-group --vpc $vpc_name >/dev/null
+    ibmcloud is security-group-rule-add $vpc_name-group inbound icmp_tcp_udp --remote $vpc_name-group --vpc $vpc_name >/dev/null
     echo "Done"
 
     print_msg "\nPrinting the VPC Security group '$vpc_name-group' ..."
@@ -624,23 +634,37 @@ if ! ibmcloud ce pds get --name fleet-input-store >/dev/null 2>&1; then
         --cos-access-secret fleet-cos-secret
 fi
 
+
+print_msg "\nCreating the Code Engine subnetpools 'fleet-subnetpool' ..."
+if ! ibmcloud ce connectivity subnetpool get --name fleet-subnetpool >/dev/null 2>&1; then
+    security_group_crn="$(ibmcloud is security-group ${vpc_name}-group --output json | jq -r '.crn')"
+    ibmcloud ce connectivity subnetpool create --name fleet-subnetpool \
+        --subnet-crn key_1="$(ibmcloud is subnet ${vpc_name}-subnet-1 --output json | jq -r '.crn')" \
+        --security-group-crn key_1="${security_group_crn}" \
+        --subnet-crn key_2="$(ibmcloud is subnet ${vpc_name}-subnet-2 --output json | jq -r '.crn')" \
+        --security-group-crn key_2="${security_group_crn}" \
+        --subnet-crn key_3="$(ibmcloud is subnet ${vpc_name}-subnet-3 --output json | jq -r '.crn')" \
+        --security-group-crn key_3="${security_group_crn}"
+fi
+for i in {1..3}
+do
+    if ! ibmcloud ce connectivity subnetpool get --name fleet-subnetpool-zone-$i >/dev/null 2>&1; then
+        security_group_crn="$(ibmcloud is security-group ${vpc_name}-group --output json | jq -r '.crn')"
+        ibmcloud ce connectivity subnetpool create --name fleet-subnetpool-zone-$i \
+            --subnet-crn key="$(ibmcloud is subnet ${vpc_name}-subnet-$i --output json | jq -r '.crn')" \
+            --security-group-crn key="${security_group_crn}"
+    fi
+done
+
 print_msg "\nCreating the Code Engine default secret 'codeengine-fleet-defaults' with observability and VPC subnet configurations ..."
 create_or_update=update
 if ! ibmcloud ce secret get --name codeengine-fleet-defaults >/dev/null 2>&1; then
     create_or_update=create
 fi
-security_group_crn="$(ibmcloud is security-group ${vpc_name}-group --output json | jq -r '.crn')"
-ibmcloud ce secret $create_or_update -n codeengine-fleet-defaults \
-    --from-literal pool_subnet_crn_1="$(ibmcloud is subnet ${vpc_name}-subnet-1 --output json | jq -r '.crn')" \
-    --from-literal pool_security_group_crns_1="${security_group_crn}" \
-    --from-literal pool_subnet_crn_2="$(ibmcloud is subnet ${vpc_name}-subnet-2 --output json | jq -r '.crn')" \
-    --from-literal pool_security_group_crns_2="${security_group_crn}" \
-    --from-literal pool_subnet_crn_3="$(ibmcloud is subnet ${vpc_name}-subnet-3 --output json | jq -r '.crn')" \
-    --from-literal pool_security_group_crns_3="${security_group_crn}" 
 
 if [[ "$SETUP_LOGGING" == "true" && "$icl_ingestion_apikey" != "" ]]; then
     print_msg "\nMake sure logs are sent to '${icl_ingestion_host}' ..."
-    ibmcloud ce secret update -n codeengine-fleet-defaults \
+    ibmcloud ce secret $create_or_update -n codeengine-fleet-defaults \
         --from-literal logging_ingress_endpoint="${icl_ingestion_host}" \
         --from-literal logging_sender_api_key="${icl_ingestion_apikey}" \
         --from-literal logging_level_agent=info \
