@@ -4,6 +4,7 @@ COPY --chown=default:root job/* .
 RUN npm install
 RUN npm audit fix --force
 RUN pwd -L
+RUN chmod +x job.mjs
 RUN ls -l
 
 # Use a small distroless image for as runtime image
@@ -12,5 +13,4 @@ COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
 # causes errors RUN pwd -L
 # RUN ls -l
-# RUN chmod +x ./job/job.mjs
 ENTRYPOINT ["job.mjs"]
