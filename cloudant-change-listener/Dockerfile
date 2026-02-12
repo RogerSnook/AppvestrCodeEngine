@@ -9,5 +9,5 @@ FROM gcr.io/distroless/nodejs22
 COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
 # RUN ls -l
-RUN chmod +x ./job/job.mjs
+# RUN chmod +x ./job/job.mjs
 ENTRYPOINT ["./job/job.mjs"]
