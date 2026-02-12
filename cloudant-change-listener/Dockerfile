@@ -4,12 +4,13 @@ COPY --chown=default:root job/* .
 RUN npm install
 RUN npm audit fix --force
 RUN pwd -L
+RUN ls -l
 
 # Use a small distroless image for as runtime image
 FROM gcr.io/distroless/nodejs22
 COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
-RUN pwd -L
+# causes errors RUN pwd -L
 # RUN ls -l
 # RUN chmod +x ./job/job.mjs
 ENTRYPOINT ["job.mjs"]
