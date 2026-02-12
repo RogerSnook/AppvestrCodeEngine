@@ -10,4 +10,4 @@ COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
 # RUN ls -l
 # RUN chmod +x ./job/job.mjs
-ENTRYPOINT ["./job/job.mjs"]
+ENTRYPOINT ["./cloudant-change-listener/job/job.mjs"]
