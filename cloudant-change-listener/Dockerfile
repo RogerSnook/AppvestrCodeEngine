@@ -7,4 +7,4 @@ RUN npm install
 FROM gcr.io/distroless/nodejs22
 COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
-ENTRYPOINT ["job.mjs"]
+ENTRYPOINT ["./job/job.mjs"]
