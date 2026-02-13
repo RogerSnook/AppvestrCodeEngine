@@ -15,4 +15,6 @@ COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
 # causes errors RUN pwd -L
 # RUN ls -l
-ENTRYPOINT ["/usr/bin/node", "job.mjs"]
+# ENTRYPOINT ["/usr/bin/node", "job.mjs"]
+# By just providing CMD ["job.mjs"], you are passing your script as the argument to the built-in Node binary, avoiding the "path not found" error entirely.
+CMD ["job.mjs"]
