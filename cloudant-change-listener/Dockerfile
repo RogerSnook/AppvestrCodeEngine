@@ -13,4 +13,4 @@ COPY --from=build-env /opt/app-root/src /app
 WORKDIR /app
 # causes errors RUN pwd -L
 # RUN ls -l
-ENTRYPOINT ["node", "job.mjs"]
+ENTRYPOINT ["/usr/bin/node", "job.mjs"]
