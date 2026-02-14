@@ -1,7 +1,7 @@
 var nodemailer = require("nodemailer");
     
 async function main(params) {
-    console.log(">>> Function started. Event ID:", params.id || "No ID provided");
+    console.log(">>> Function started. Event ID: ", params.id || "No ID provided");
 
     // 1. Setup Transporter
     const transporter = nodemailer.createTransport({
@@ -18,7 +18,7 @@ async function main(params) {
         // 2. Verify Connection
         console.log(">>> Verifying SMTP connection...");
         await transporter.verify();
-        console.log(">>> SMTP Connection Successful.");
+        console.log(">>> SMTP Connection Successful!");
 
         // 3. Prepare Email
         const mailOptions = {
