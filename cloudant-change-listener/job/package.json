@@ -18,7 +18,7 @@
     "@ibm-cloud/ibm-code-engine-sdk": "^4.0.0",
     "ibm-cloud-sdk-core": "^5.4.2",
     "lru-cache": "^10.0.3",
-    "nodemailer": "8.0.1",
+    "nodemailer": "^8.0.1",
     "log4js": "^6.9.1"
   }
 }
