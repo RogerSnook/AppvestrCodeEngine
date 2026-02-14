@@ -76,6 +76,8 @@ import { BasicAuthenticator, IamAuthenticator } from "ibm-cloud-sdk-core";
 import log4js from "log4js";
 import { LRUCache } from "lru-cache";
 import { isJobAlreadyRunning, updateJobConfig, getJobConfig } from "./ce-api-utils.mjs";
+import nodemailer from 'nodemailer';
+console.log("Nodemailer loaded successfully: ", !!nodemailer);
 
 //
 // use a formatted logger to have timestamps in the log output 
