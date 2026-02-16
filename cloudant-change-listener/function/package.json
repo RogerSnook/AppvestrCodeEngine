@@ -3,7 +3,10 @@
   "description": "Function for cloudant-change-listener to notify on changes",
   "version": "1.0.0",
   "main": "function.js",
-  "dependencies" : {
-		    "nodemailer": "^8.0.1"
- 	}
+  "scripts": {
+    "start": "node run-local.js"
+  },
+  "dependencies": {
+    "nodemailer": "^8.0.1"
+  }
 }

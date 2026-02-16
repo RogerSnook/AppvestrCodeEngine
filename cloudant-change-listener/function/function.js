@@ -1,9 +1,19 @@
-var nodemailer = require("nodemailer");
-    
+let nodemailer;
+
 async function main(params) {
     console.log(">>> Function started. Event ID: ", params.id || "No ID provided");
 
+    if (process.env.SKIP_SMTP === 'true') {
+        console.log('>>> SKIP_SMTP is set; skipping real SMTP operations (local run).');
+        console.log('>>> Would send mail to:', process.env.SMTP_USER || '(no SMTP_USER)');
+        return {
+            status: 'success',
+            messageId: 'skipped-local'
+        };
+    }
+
     // 1. Setup Transporter
+    nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
         host: "smtp.comcast.net",
         port: 587, // Changed to 587 for better cloud compatibility
@@ -22,9 +32,9 @@ async function main(params) {
 
         // 3. Prepare Email
         const mailOptions = {
-            from: '"Code Engine Alerter" <'+ process.env.SMTP_USER +'>',
+            from: '"Appvestr® Alerter" <'+ process.env.SMTP_USER +'>',
             to: process.env.SMTP_USER,
-            subject: "Cloudant Change Detected",
+            subject: "Appvestr® User Privacy Change Detected",
             text: `A change occurred in Cloudant. ID: ${params.id}`,
             html: `<b>Cloudant Change Detected</b><br><pre>${JSON.stringify(params, null, 2)}</pre>`,
         };
