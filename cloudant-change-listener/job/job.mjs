@@ -328,8 +328,8 @@ function dbChangeHandler(change) {
   // of the document that has been changed
   let doc_revision = "unknown";
   let doc_revision_nr = 0;
-  if (change.changes && change.changes[0] && change.changes[0].rev) {
-    doc_revision = change.changes[0].rev;
+  if (change.changes && change.changes[0] && change.changes[0].seq) {
+    doc_revision = change.changes[0].seq;
     doc_revision_nr = Number(doc_revision.split("-")[0]);
   }
   const doc_name = change.id || "unknown";
@@ -340,7 +340,7 @@ function dbChangeHandler(change) {
   const documentRev = parseInt(doc_revision_nr, 10);
   const processedRev = parseInt(lruCache.get(doc_name), 10) || -1;
   if (processedRev >= documentRev) {
-    logger.info(`Ignoring change on document '${doc_name}' whith revision '${doc_revision}', changes: '${change.changes}'`);
+    logger.info(`Ignoring change on document '${doc_name}' with revision '${doc_revision}', changes: '${change.changes}'`);
     return;
   }
 
