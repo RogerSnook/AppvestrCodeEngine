@@ -1,11 +1,11 @@
 let nodemailer;
 
 async function main(params) {
-    console.log(">>> Function started. Event ID: ", params.id || "No ID provided");
+    logger.info(">>> Function started. Event ID: ", params.id || "No ID provided");
 
     if (process.env.SKIP_SMTP === 'true') {
-        console.log('>>> SKIP_SMTP is set; skipping real SMTP operations (local run).');
-        console.log('>>> Would send mail to:', process.env.SMTP_USER || '(no SMTP_USER)');
+        logger.info('>>> SKIP_SMTP is set; skipping real SMTP operations (local run).');
+        logger.info('>>> Would send mail to:', process.env.SMTP_USER || '(no SMTP_USER)');
         return {
             status: 'success',
             messageId: 'skipped-local'
@@ -26,9 +26,9 @@ async function main(params) {
 
     try {
         // 2. Verify Connection
-        console.log(">>> Verifying SMTP connection...");
+        logger.info(">>> Verifying SMTP connection...");
         await transporter.verify();
-        console.log(">>> SMTP Connection Successful!");
+        logger.info(">>> SMTP Connection Successful!");
 
         // 3. Prepare Email
         const mailOptions = {
@@ -40,17 +40,17 @@ async function main(params) {
         };
 
         // 4. Send Mail
-        console.log(">>> Sending email...");
+        logger.info(">>> Sending email...");
         const info = await transporter.sendMail(mailOptions);
         
-        console.log(">>> Email sent successfully! Message ID:", info.messageId);
+        logger.info(">>> Email sent successfully! Message ID:", info.messageId);
         return { 
             status: "success", 
             messageId: info.messageId 
         };
 
     } catch (error) {
-        console.error(">>> ERROR encountered:", error.message);
+        logger.error(">>> ERROR encountered:", error.message);
         return { 
             status: "error", 
             error: error.message 
