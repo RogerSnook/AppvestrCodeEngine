@@ -470,11 +470,11 @@ async function doListen() {
         continue; // run waitForDbChanges with new since token
       }
 
-      if (Array.isArray(response.result.results) && response.result.results.length === 0 && response.result.last_seq) {
+      if (Array.isArray(response.result.results) && response.result.results.length === 0 && response.result.seq) {
         //
         // Wait timed out and delivered the lastSeq value as start point for the next loop
-        sinceToken = response.result.last_seq;
-        lastHandledSeq = response.result.last_seq;
+        sinceToken = response.result.seq;
+        lastHandledSeq = response.result.seq;
         logger.info(`No changes detected in the given wait period. Assigned new since token from result.`);
         continue; // run waitForDbChanges with updated since token
       }
@@ -489,9 +489,9 @@ async function doListen() {
 
         //
         // Get the last_seq value to use in the next postChanges() query
-        sinceToken = response.result.last_seq;
-        lastHandledSeq = response.result.last_seq;
-        logger.info(`Looping with the next sinceToken: ${response.result.last_seq}.`);
+        sinceToken = response.result.seq;
+        lastHandledSeq = response.result.seq;
+        logger.info(`Looping with the next sinceToken: ${response.result.seq}.`);
         continue; // run waitForDbChanges with updated since token
       }
 
