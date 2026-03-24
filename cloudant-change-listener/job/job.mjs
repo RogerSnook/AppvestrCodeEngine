@@ -491,6 +491,7 @@ async function doListen() {
         // Get the last_seq value to use in the next postChanges() query
         sinceToken = response.result.last_seq;
         lastHandledSeq = response.result.last_seq;
+        logger.info(`Looping with the next sinceToken: ${response.result.last_seq}.`);
         continue; // run waitForDbChanges with updated since token
       }
 
