@@ -482,8 +482,10 @@ async function doListen() {
       if (Array.isArray(response.result.results) && response.result.results.length > 0) {
         logger.info(`Detected ${response.result.results.length} change(s) in the DB. Assigned new since token from result.`);
         // Get the last_seq value to use in the next postChanges() query
-        sinceToken = response.result.last_seq;
-        lastHandledSeq = response.result.last_seq;
+        // sinceToken = response.result.last_seq;
+        sinceToken = response.last_seq;
+        // lastHandledSeq = response.result.last_seq;
+        lastHandledSeq = sinceToken;
         
         // processing each change individually
         response.result.results.forEach((result) => {
@@ -491,7 +493,9 @@ async function doListen() {
         });
 
         // had the last_seq here but moved it up.
-        logger.info(`Looping with the next sinceToken: ${response.result.last_seq}.`);
+        // logger.info(`Looping with the next sinceToken: ${response.result.last_seq}.`);
+        logger.info(`Looping with the next sinceToken: ${response.last_seq}.`);
+
         continue; // run waitForDbChanges with updated since token
       }
 
