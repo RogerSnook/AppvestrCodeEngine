@@ -485,7 +485,10 @@ async function doListen() {
         logger.info(`Detected ${response.result.results.length} change(s) in the DB. Assigned new since token from result.`);
         // Get the last_seq value to use in the next postChanges() query
         // sinceToken = response.result.last_seq;
-        sinceToken = response.changes.seq;
+        logger.info('full response: ${JSON.stringify(response)}');
+
+        sinceToken = response.result.last_seq;
+        // response.changes.seq
         // lastHandledSeq = response.result.last_seq;
         lastHandledSeq = sinceToken;
         
