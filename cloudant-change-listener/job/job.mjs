@@ -328,9 +328,11 @@ function dbChangeHandler(change) {
   // of the document that has been changed
   let doc_revision = "unknown";
   let doc_revision_nr = 0;
-  if (change.changes && change.changes[0] && change.changes[0].seq) {
-    doc_revision = change.changes[0].seq;
-    doc_revision_nr = Number(doc_revision.split("-")[0]);
+  // if (change.changes && change.changes[0] && change.changes[0].seq) {
+  if (change.changes && change.changes.seq) {
+    
+    doc_revision = change.changes.seq;
+    doc_revision_nr = Number(doc_revision.split("-"));
   }
   const doc_name = change.id || "unknown";
   logger.info(`Received a change event from  DB '${dbName}' for doc '${doc_name}' with revision '${doc_revision}', change: '${JSON.stringify(change)}'`);
@@ -483,7 +485,7 @@ async function doListen() {
         logger.info(`Detected ${response.result.results.length} change(s) in the DB. Assigned new since token from result.`);
         // Get the last_seq value to use in the next postChanges() query
         // sinceToken = response.result.last_seq;
-        sinceToken = response.last_seq;
+        sinceToken = response.changes.seq;
         // lastHandledSeq = response.result.last_seq;
         lastHandledSeq = sinceToken;
         
