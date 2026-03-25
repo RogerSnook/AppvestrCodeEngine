@@ -472,24 +472,20 @@ async function doListen() {
         continue; // run waitForDbChanges with new since token
       }
 
-      if (Array.isArray(response.result.results) && response.result.results.length === 0 && response.result.last_seq) {
+      if (Array.isArray(response.result.results) && response.result.results.length === 0 && response.result.lastSeq) {
         //
         // Wait timed out and delivered the lastSeq value as start point for the next loop
-        sinceToken = response.result.last_seq;
-        lastHandledSeq = response.result.last_seq;
+        sinceToken = response.result.lastSeq;
+        lastHandledSeq = response.result.lastSeq;
         logger.info(`No changes detected in the given wait period. Assigned new since token from result.`);
         continue; // run waitForDbChanges with updated since token
       }
 
       if (Array.isArray(response.result.results) && response.result.results.length > 0) {
         logger.info(`Detected ${response.result.results.length} change(s) in the DB. Assigned new since token from result.`);
-        // Get the last_seq value to use in the next postChanges() query
-        // sinceToken = response.result.last_seq;
-        logger.info(`Full response from _change: '${JSON.stringify(response)}'`);
-
-        sinceToken = response.result.last_seq;
-        // response.changes.seq
-        // lastHandledSeq = response.result.last_seq;
+        // Get the last_seq value to use in the next postChanges() query BUG to add to issues: lastSeq not last_seq
+        sinceToken = response.result.lastSeq;
+        // logger.info(`Full response from _change: '${JSON.stringify(response)}'`);
         lastHandledSeq = sinceToken;
         
         // processing each change individually
@@ -499,7 +495,7 @@ async function doListen() {
 
         // had the last_seq here but moved it up.
         // logger.info(`Looping with the next sinceToken: ${response.result.last_seq}.`);
-        logger.info(`Looping with the next sinceToken: ${response.last_seq}.`);
+        logger.info(`Looping with the next sinceToken: ${sinceToken}.`);
 
         continue; // run waitForDbChanges with updated since token
       }
