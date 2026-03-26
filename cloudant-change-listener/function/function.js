@@ -36,7 +36,7 @@ async function main(params) {
             to: process.env.SMTP_USER,
             subject: "Appvestr® User Privacy Change Detected",
             text: `A change occurred in Cloudant. ID: ${params.id}`,
-            html: `<b>Cloudant Change Detected</b><br><pre>${JSON.stringify(params, null, 2)}</pre>`,
+            html: `<b>User Privacy Change Detected</b><br><pre>${params.id}<br>${params.seq}</pre>`,
         };
 
         // 4. Send Mail
